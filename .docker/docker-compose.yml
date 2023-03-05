@@ -1,42 +1,30 @@
 version: '3.3'
 services:
   web:
-    image: php:8.0.9-apache
-    command:
-      - /bin/sh
-      - -c
-      - |
-        apt-get update
-        apt-get install -y --no-install-recommends git
-        apt-get install wget
-        rm index.php
-        wget https://raw.githubusercontent.com/keta410/swarm02/main/apache-php/app/index.php
-        apache2-foreground
-
-    volumes:
-      - app:/var/www/html/
+    image: nestlae/swarm01-web:270223
     networks:
       - traefik-public
+    logging:
+      driver: json-file
+    volumes:
+      - app:/var/www/html/
+    container_name: apache2-php
     deploy:
       replicas: 1
       labels:
-        traefik.constraint-label: traefik-public
-        traefik.docker.network: traefik-public
-        traefik.enable: 'true'
-        traefik.http.routers.keta-http.entrypoints: http
-        traefik.http.routers.keta-http.rule: Host(`keta.demo`)
-        traefik.http.services.keta.loadbalancer.server.port: '80'
-        traefik.http.routers.keta-http.middlewares: https-redirect
-        traefik.http.routers.keta-https.rule: Host(`keta.demo`)
-        traefik.http.routers.keta-https.entrypoints: https
-        traefik.http.routers.keta-https.tls: 'true'
+        - traefik.docker.network=traefik-public
+        - traefik.enable=true
+        - traefik.http.routers.${APPNAME}-https.entrypoints=http
+        - traefik.http.routers.${APPNAME}-https.rule=Host("${APPNAME}.xops.ipv9.me")
+        - traefik.http.routers.${APPNAME}-https.tls.certresolver=default
+        - traefik.http.services.${APPNAME}.loadbalancer.server.port=80
       resources:
         reservations:
           cpus: '0.1'
-          memory: 8M
+          memory: 10M
         limits:
           cpus: '0.4'
-          memory: 64M
+          memory: 50M
 
 volumes:
   app:
