@@ -1,9 +1,9 @@
 version: '3.3'
 services:
   web:
-    image: nestlae/swarm01-web:270223
+    image: nestlae/swarm01-web:110323
     networks:
-      - traefik-public
+      - webproxy
     logging:
       driver: json-file
     volumes:
@@ -12,9 +12,9 @@ services:
     deploy:
       replicas: 1
       labels:
-        - traefik.docker.network=traefik-public
+        - traefik.docker.network=webproxy
         - traefik.enable=true
-        - traefik.http.routers.${APPNAME}-https.entrypoints=http
+        - traefik.http.routers.${APPNAME}-https.entrypoints=websecure
         - traefik.http.routers.${APPNAME}-https.rule=Host("${APPNAME}.xops.ipv9.me")
         - traefik.http.routers.${APPNAME}-https.tls.certresolver=default
         - traefik.http.services.${APPNAME}.loadbalancer.server.port=80
@@ -30,5 +30,5 @@ volumes:
   app:
 
 networks:
-  traefik-public:
+  webproxy:
     external: true
